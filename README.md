@@ -1,1 +1,1 @@
-# Short_reads_Mapping_Coverage
+# Short Reads Mapping and Coverage
