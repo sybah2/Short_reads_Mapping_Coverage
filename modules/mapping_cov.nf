@@ -78,21 +78,19 @@ process index {
 
 process mapping {
     
-    publishDir "${params.result}/bams", mode: 'copy' 
+    publishDir "${params.result}/bams", pattern: "${sample_id}*", mode: 'copy' 
     input:
     path(index)
     path reference
     tuple val(sample_id), path(reads)
 
-    //output:
-    //tuple val("${sample_id}"), path("${sample_id}.bam"), emit: trimmed_fastqs
-
+    output:
+    path("${sample_id}.bam"), emit: trimmed_fastqs
 
     script:
     template 'mapping.bash'
 
 }
-
 
 workflow mapping_cov {
     
