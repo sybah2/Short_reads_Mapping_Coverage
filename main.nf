@@ -11,11 +11,6 @@ include { mapping_cov } from  './modules/mapping_cov.nf'
 // Param Checking 
 //---------------------------------------------------------------
 
-
-if(!params.readFoler) {
-    throw new Exception("Missing parameter params.readFoler")
-  }
-
 if(!params.reference) {
     throw new Exception("Missing parameter params.reference")
   }

@@ -18,7 +18,7 @@ process fastqQulity {
 
 process multiqc {
 
-    publishDir "${params.result}/multiqc", mode: 'copy'
+    //publishDir "${params.result}/multiqc", mode: 'copy'
     input:
     path(qc_files)
 
@@ -63,55 +63,13 @@ process trimming {
 
 }
 
-process spades_assembly {
-
-    publishDir "${params.result}/Fasta", mode: 'copy', pattern: "*.fasta"
-    publishDir "${params.result}/Assembly", mode: 'copy', pattern: "${sample_id}"
-    
-    input:
-    tuple val(sample_id), path(reads)
-
-    output:
-    path("${sample_id}"), emit: assemblies
-    tuple val("${sample_id}"), path("${sample_id}.fasta"), emit: fasta
-    path("${sample_id}.fasta"), emit: mlst_fasta
-    val(sample_id), emit: sample_id
-    path(reads), emit: reads
-
-    script:
-    template 'spades.bash'
-    
-}
-
-process unicycler_assembly {
-
-    publishDir "${params.result}/Fasta", mode: 'copy', pattern: "*.fasta"
-    publishDir "${params.result}/Assembly", mode: 'copy', pattern: "${sample_id}"
-    
-    input:
-    tuple val(sample_id), path(reads)
-
-    output:
-    path("${sample_id}"), emit: assemblies
-    tuple val("${sample_id}"), path("${sample_id}.fasta"), emit: fasta
-    path("${sample_id}.fasta"), emit: mlst_fasta
-    val(sample_id), emit: sample_id
-    path(reads), emit: reads
-
-    script:
-    template 'unicycler.bash'
-    
-}
-
 process index {
 
     input:
     path(reference)
-    path(reads)
 
     output:
     path("${reference}*"), emit: index
-    path(reads), emit: reads
     path(reference), emit: reference
 
 
@@ -127,14 +85,13 @@ process mapping {
     input:
     path(index)
     path(reference)
-    path(reads)
+    tuple val(sample_id), path(reads)
 
     output:
     path("${sample_id}.bam"), emit: trimmed_fastqs
     path("*.txt")
 
     script:
-    sample_id = reference.getSimpleName()
     template 'mapping.bash'
 
 }
@@ -153,14 +110,7 @@ workflow mapping_cov {
     trimmed_reads = trimming(samples)
 
 
-    if (params.assembler == 'spades') {
-        assemblies = spades_assembly(trimmed_reads.trimmed_fastqs)
-    }
-    else if (params.assembler == 'unicycler') {
-        assemblies = unicycler_assembly(trimmed_reads.trimmed_fastqs)
-    }
-
-    index = index(assemblies.mlst_fasta, assemblies.reads)
-    bams = mapping(index.index, index.reference, index.reads)
+    index = index(params.reference)
+    bams = mapping(index.index, index.reference, trimmed_reads.trimmed_fastqs)
 
 }
