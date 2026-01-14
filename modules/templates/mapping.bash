@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-bwa mem ${reference} ${reads[0]} ${reads[1]} > ${sample_id}.sam
+bwa mem ${reference} ${read1} ${read2} > ${sample_id}.sam
 
 samtools view -Sb ${sample_id}.sam > temp.bam
 

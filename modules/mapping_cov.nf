@@ -85,7 +85,7 @@ process mapping {
     input:
     path(index)
     path(reference)
-    tuple val(sample_id), path(reads)
+    tuple val(sample_id), file(read1), file(read2)
 
     output:
     path("${sample_id}.bam"), emit: trimmed_fastqs
@@ -102,15 +102,16 @@ workflow mapping_cov {
     samples
 
     main:
+    samples.view()
     
-    qc = fastqQulity(samples)
+    //qc = fastqQulity(samples)
 
-    multiqc(qc.collect())
+    //multiqc(qc.collect())
 
-    trimmed_reads = trimming(samples)
+    //trimmed_reads = trimming(samples)
 
 
     index = index(params.reference)
-    bams = mapping(index.index, index.reference, trimmed_reads.trimmed_fastqs)
+    bams = mapping(index.index, index.reference, samples)
 
 }
